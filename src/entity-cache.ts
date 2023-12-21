@@ -1,4 +1,15 @@
-import {Account, Comment, Creator, Follow, FollowProfile, Mirror, Post, Profile, Stat} from "./model";
+import {
+    Account,
+    AccountProfileFollow,
+    Comment,
+    Creator,
+    Follow, FollowNFTTransferred,
+    FollowProfile,
+    Mirror,
+    Post,
+    Profile, ProfileProfileFollow,
+    Stat
+} from "./model";
 import {DataHandlerContext} from "@subsquid/evm-processor";
 import {Store} from "@subsquid/typeorm-store";
 
@@ -13,6 +24,9 @@ export class EntityCache {
     public comments!: Map<string, Comment>;
     public follows!: Map<string, Follow>;
     public followProfiles!: Map<string, FollowProfile>;
+    public accountProfileFollows!: Map<string, AccountProfileFollow>;
+    public profileProfileFollows!: Map<string, ProfileProfileFollow>;
+    public nftTransfers!: Map<string, FollowNFTTransferred>;
 
     public ctx: DataHandlerContext<Store, {}>;
 
@@ -31,6 +45,9 @@ export class EntityCache {
         this.comments = new Map<string, Comment>();
         this.follows = new Map<string, Follow>();
         this.followProfiles = new Map<string, FollowProfile>();
+        this.accountProfileFollows = new Map<string, AccountProfileFollow>();
+        this.profileProfileFollows = new Map<string, ProfileProfileFollow>();
+        this.nftTransfers = new Map<string, FollowNFTTransferred>();
     }
 
     getStats = async (id: string): Promise<Stat | undefined> => {
@@ -159,6 +176,48 @@ export class EntityCache {
         this.followProfiles.set(t.id, t);
     }
 
+    getAccountProfileFollow = async (id: string): Promise<AccountProfileFollow | undefined> => {
+        // Check if entity exists in cache
+        if (this.accountProfileFollows.has(id)) return this.accountProfileFollows.get(id);
+
+        // Check if exists in DB and save it to cache
+        const a = await this.ctx.store.get(AccountProfileFollow, id);
+        if (a) this.accountProfileFollows.set(id, a);
+        return a;
+    }
+
+    saveAccountProfileFollow = (t: AccountProfileFollow) => {
+        this.accountProfileFollows.set(t.id, t);
+    }
+
+    getProfileProfileFollow = async (id: string): Promise<ProfileProfileFollow | undefined> => {
+        // Check if entity exists in cache
+        if (this.profileProfileFollows.has(id)) return this.profileProfileFollows.get(id);
+
+        // Check if exists in DB and save it to cache
+        const a = await this.ctx.store.get(ProfileProfileFollow, id);
+        if (a) this.profileProfileFollows.set(id, a);
+        return a;
+    }
+
+    saveProfileProfileFollow = (t: ProfileProfileFollow) => {
+        this.profileProfileFollows.set(t.id, t);
+    }
+
+    getFollowNFTTransfer = async (id: string): Promise<FollowNFTTransferred | undefined> => {
+        // Check if entity exists in cache
+        if (this.nftTransfers.has(id)) return this.nftTransfers.get(id);
+
+        // Check if exists in DB and save it to cache
+        const a = await this.ctx.store.get(FollowNFTTransferred, id);
+        if (a) this.nftTransfers.set(id, a);
+        return a;
+    }
+
+    saveFollowNFTTransfer = (t: FollowNFTTransferred) => {
+        this.nftTransfers.set(t.id, t);
+    }
+
 
     // Persist Cache to DB
     persistCacheToDatabase = async (flushCache: boolean) => {
@@ -171,6 +230,15 @@ export class EntityCache {
         await this.ctx.store.upsert([...this.comments.values()]);
         await this.ctx.store.upsert([...this.follows.values()]);
         await this.ctx.store.upsert([...this.followProfiles.values()]);
+        await this.ctx.store.upsert([...this.accountProfileFollows.values()]);
+        await this.ctx.store.upsert([...this.profileProfileFollows.values()]);
+        await this.ctx.store.upsert([...this.nftTransfers.values()]);
+
+        // Remove the soft Deleted accountProfileFollows and profileProfileFollows
+        const accountProfileFollowsToBeDeleted = [...this.accountProfileFollows.values()].filter(e => e.isDeleted).map(e => e.id);
+        const profileProfileFollowsToBeDeleted = [...this.profileProfileFollows.values()].filter(e => e.isDeleted).map(e => e.id);
+        if (accountProfileFollowsToBeDeleted.length > 0) await this.ctx.store.remove(AccountProfileFollow, accountProfileFollowsToBeDeleted);
+        if (profileProfileFollowsToBeDeleted.length > 0) await this.ctx.store.remove(ProfileProfileFollow, profileProfileFollowsToBeDeleted);
 
         if (flushCache) {
             this.initializeMaps();

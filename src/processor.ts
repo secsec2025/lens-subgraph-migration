@@ -30,5 +30,6 @@ export const processor = new EvmBatchProcessor()
             lensHubEvents.ProfileImageURISet.topic, lensHubEvents.DispatcherSet.topic,
             lensHubEvents.ProfileCreatorWhitelisted.topic, lensHubEvents.FollowModuleSet.topic,
             lensHubEvents.PostCreated.topic, lensHubEvents.MirrorCreated.topic,
-            lensHubEvents.CommentCreated.topic, lensHubEvents.Followed.topic]
+            lensHubEvents.CommentCreated.topic, lensHubEvents.Followed.topic,
+            lensHubEvents.FollowNFTTransferred.topic]
     });

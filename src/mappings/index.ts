@@ -5,7 +5,10 @@ import {creators} from "../modules/creators";
 import {publications} from "../modules/publications";
 import {stats} from "../modules/lens";
 import {follows} from "../modules/follows";
-import {FollowProfile} from "../model";
+import {AccountProfileFollow, FollowProfile} from "../model";
+import {ZERO_ADDRESS} from "../constants";
+import assert from "assert";
+import {transfersNFT} from "../modules/transfersNFT";
 
 export const handleProfileCreated =async (eventData: ProfileCreatedEventData, logEvent: any, entityCache: EntityCache) => {
     const eventData_creator = eventData.creator.toLowerCase();
@@ -127,11 +130,12 @@ export const handleCommentCreated =async (eventData: CommentCreatedEventData, lo
 
 
 export const handleFollowed =async (eventData: FollowedEventData, logEvent: any, entityCache: EntityCache) => {
-    let newFollows: string[] = eventData.profileIds.map<string>((profileId: bigint): string => profileId.toString());
+    const newFollows: string[] = eventData.profileIds.map<string>((profileId: bigint): string => profileId.toString());
+    const eventData_follower = eventData.follower.toLowerCase();
 
-    let follow = await follows.getOrCreateFollow(`${eventData.follower.toLowerCase()}-${logEvent.transactionHash}`, entityCache);
-    follow.fromAccountId = eventData.follower.toLowerCase();
-    follow.fromProfileSTR = eventData.follower.toLowerCase();
+    const follow = await follows.getOrCreateFollow(`${eventData_follower}-${logEvent.transactionHash}`, entityCache);
+    follow.fromAccountId = eventData_follower;
+    follow.fromProfileSTR = eventData_follower;
     follow.timestamp = eventData.timestamp;
     entityCache.saveFollow(follow);
 
@@ -139,10 +143,61 @@ export const handleFollowed =async (eventData: FollowedEventData, logEvent: any,
     for (let i = 0; i < newFollows.length; i++) {
         const followedProfileId = newFollows[i];
         entityCache.saveFollowProfile(new FollowProfile({
-            id: `${eventData.follower.toLowerCase()}-${logEvent.transactionHash}-${followedProfileId}`,
+            id: `${eventData_follower}-${logEvent.transactionHash}-${followedProfileId}`,
             followId: follow.id,
             profileId: followedProfileId
         }));
     }
+}
+
+
+export const handleFollowNFTTransferred =async (eventData: FollowNFTTransferredEventData, logEvent: any, entityCache: EntityCache) => {
+    const transferId: string = `${eventData.profileId.toString()}-${logEvent.transactionHash}`;
+    let from = eventData.from.toLowerCase();
+    let to = eventData.to.toLowerCase();
+    let profile = await profiles.getOrCreateProfile(eventData.profileId, eventData.timestamp, entityCache);
+
+    if (from === ZERO_ADDRESS) {
+        // MINT FOLLOW NFT
+        let toAccount = await accounts.getOrCreateAccount(to, entityCache);
+
+        //add and count the follower to the profile and the fromAccount
+        profile.totalFollowers = profile.totalFollowers + 1n;
+        toAccount.totalFollowings = toAccount.totalFollowings + 1n;
+        entityCache.saveAccountProfileFollow(new AccountProfileFollow({
+            id: `${toAccount.id}-${profile.id}`,
+            profileId: profile.id,
+            accountId: toAccount.id,
+            isDeleted: false
+        }));
+
+        await profiles.updateProfilesFollowings(toAccount.profilesIds, profile.id, toAccount.totalFollowings, false, entityCache);
+        entityCache.saveAccount(toAccount);
+
+    } else if (to === ZERO_ADDRESS) {
+        // BURN FOLLOW NFT
+        let fromAccount = await accounts.getOrCreateAccount(from, entityCache);
+        profile.totalFollowers = profile.totalFollowers - 1n;
+
+        //minus and count the follower to the profile and the fromAccount
+        const accountProfileFollowRecord = await entityCache.getAccountProfileFollow(`${fromAccount.id}-${profile.id}`);
+        assert(accountProfileFollowRecord, `accountProfileFollowRecord for ${fromAccount.id} with profile ${profile.id} should exist at this point.`);
+        accountProfileFollowRecord.isDeleted = true;
+        entityCache.saveAccountProfileFollow(accountProfileFollowRecord);
+        fromAccount.totalFollowings = fromAccount.totalFollowings - 1n;
+
+        await profiles.updateProfilesFollowings(fromAccount.profilesIds, profile.id, fromAccount.totalFollowings, true, entityCache);
+        entityCache.saveAccount(fromAccount);
+    }
+
+    entityCache.saveProfile(profile);
+
+    const nft = await transfersNFT.getOrCreateTransfersNFT(transferId, entityCache);
+    nft.from = from;
+    nft.to = to;
+    nft.timestamp = eventData.timestamp;
+    nft.followNFTID = eventData.followNFTId;
+    nft.profileId = eventData.profileId;
+    entityCache.saveFollowNFTTransfer(nft);
 }
 

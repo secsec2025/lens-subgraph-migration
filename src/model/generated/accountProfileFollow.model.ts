@@ -15,9 +15,15 @@ export class AccountProfileFollow {
     @ManyToOne_(() => Account, {nullable: true})
     account!: Account
 
+    @Column_({nullable: true})
+    accountId!: string | undefined | null;
+
     @Index_()
     @ManyToOne_(() => Profile, {nullable: true})
     profile!: Profile
+
+    @Column_({nullable: true})
+    profileId!: string | undefined | null;
 
     @Column_("bool", {nullable: false})
     isDeleted!: boolean

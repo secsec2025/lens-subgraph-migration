@@ -19,3 +19,6 @@ type CommentCreatedEventData = {profileId: bigint, pubId: bigint, contentURI: st
 
 type FollowedEventData = {follower: string, profileIds: bigint[], followModuleDatas: string[], timestamp: bigint};
 
+type FollowNFTTransferredEventData = {profileId: bigint, followNFTId: bigint, from: string, to: string, timestamp: bigint};
+
+
