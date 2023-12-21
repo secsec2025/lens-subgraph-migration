@@ -17,4 +17,5 @@ type MirrorCreatedEventData = {profileId: bigint, pubId: bigint, profileIdPointe
 
 type CommentCreatedEventData = {profileId: bigint, pubId: bigint, contentURI: string, profileIdPointed: bigint, pubIdPointed: bigint, referenceModuleData: string, collectModule: string, collectModuleReturnData: string, referenceModule: string, referenceModuleReturnData: string, timestamp: bigint};
 
+type FollowedEventData = {follower: string, profileIds: bigint[], followModuleDatas: string[], timestamp: bigint};
 

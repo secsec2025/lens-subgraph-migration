@@ -15,7 +15,13 @@ export class FollowProfile {
     @ManyToOne_(() => Follow, {nullable: true})
     follow!: Follow
 
+    @Column_({nullable: true})
+    followId!: string | undefined | null;
+
     @Index_()
     @ManyToOne_(() => Profile, {nullable: true})
     profile!: Profile
+
+    @Column_({nullable: true})
+    profileId!: string | undefined | null;
 }

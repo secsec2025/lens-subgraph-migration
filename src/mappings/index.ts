@@ -4,6 +4,8 @@ import {accounts} from "../modules/accounts";
 import {creators} from "../modules/creators";
 import {publications} from "../modules/publications";
 import {stats} from "../modules/lens";
+import {follows} from "../modules/follows";
+import {FollowProfile} from "../model";
 
 export const handleProfileCreated =async (eventData: ProfileCreatedEventData, logEvent: any, entityCache: EntityCache) => {
     const eventData_creator = eventData.creator.toLowerCase();
@@ -121,5 +123,26 @@ export const handleCommentCreated =async (eventData: CommentCreatedEventData, lo
     stat.lastCommentCreatedAt = eventData.timestamp;
     entityCache.saveStats(stat);
     entityCache.saveComment(comment);
+}
+
+
+export const handleFollowed =async (eventData: FollowedEventData, logEvent: any, entityCache: EntityCache) => {
+    let newFollows: string[] = eventData.profileIds.map<string>((profileId: bigint): string => profileId.toString());
+
+    let follow = await follows.getOrCreateFollow(`${eventData.follower.toLowerCase()}-${logEvent.transactionHash}`, entityCache);
+    follow.fromAccountId = eventData.follower.toLowerCase();
+    follow.fromProfileSTR = eventData.follower.toLowerCase();
+    follow.timestamp = eventData.timestamp;
+    entityCache.saveFollow(follow);
+
+    // save toProfiles
+    for (let i = 0; i < newFollows.length; i++) {
+        const followedProfileId = newFollows[i];
+        entityCache.saveFollowProfile(new FollowProfile({
+            id: `${eventData.follower.toLowerCase()}-${logEvent.transactionHash}-${followedProfileId}`,
+            followId: follow.id,
+            profileId: followedProfileId
+        }));
+    }
 }
 

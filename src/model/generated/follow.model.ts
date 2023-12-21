@@ -19,6 +19,9 @@ export class Follow {
     @ManyToOne_(() => Account, {nullable: true})
     fromAccount!: Account
 
+    @Column_({nullable: true})
+    fromAccountId!: string | undefined | null;
+
     @Column_("text", {nullable: false})
     fromProfileSTR!: string
 

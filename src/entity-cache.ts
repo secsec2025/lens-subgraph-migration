@@ -1,4 +1,4 @@
-import {Account, Comment, Creator, Mirror, Post, Profile, Stat} from "./model";
+import {Account, Comment, Creator, Follow, FollowProfile, Mirror, Post, Profile, Stat} from "./model";
 import {DataHandlerContext} from "@subsquid/evm-processor";
 import {Store} from "@subsquid/typeorm-store";
 
@@ -11,6 +11,8 @@ export class EntityCache {
     public posts!: Map<string, Post>;
     public mirrors!: Map<string, Mirror>;
     public comments!: Map<string, Comment>;
+    public follows!: Map<string, Follow>;
+    public followProfiles!: Map<string, FollowProfile>;
 
     public ctx: DataHandlerContext<Store, {}>;
 
@@ -27,6 +29,8 @@ export class EntityCache {
         this.posts = new Map<string, Post>();
         this.mirrors = new Map<string, Mirror>();
         this.comments = new Map<string, Comment>();
+        this.follows = new Map<string, Follow>();
+        this.followProfiles = new Map<string, FollowProfile>();
     }
 
     getStats = async (id: string): Promise<Stat | undefined> => {
@@ -127,6 +131,34 @@ export class EntityCache {
         this.comments.set(t.id, t);
     }
 
+    getFollow = async (id: string): Promise<Follow | undefined> => {
+        // Check if entity exists in cache
+        if (this.follows.has(id)) return this.follows.get(id);
+
+        // Check if exists in DB and save it to cache
+        const a = await this.ctx.store.get(Follow, id);
+        if (a) this.follows.set(id, a);
+        return a;
+    }
+
+    saveFollow = (t: Follow) => {
+        this.follows.set(t.id, t);
+    }
+
+    getFollowProfile = async (id: string): Promise<FollowProfile | undefined> => {
+        // Check if entity exists in cache
+        if (this.followProfiles.has(id)) return this.followProfiles.get(id);
+
+        // Check if exists in DB and save it to cache
+        const a = await this.ctx.store.get(FollowProfile, id);
+        if (a) this.followProfiles.set(id, a);
+        return a;
+    }
+
+    saveFollowProfile = (t: FollowProfile) => {
+        this.followProfiles.set(t.id, t);
+    }
+
 
     // Persist Cache to DB
     persistCacheToDatabase = async (flushCache: boolean) => {
@@ -137,6 +169,8 @@ export class EntityCache {
         await this.ctx.store.upsert([...this.posts.values()]);
         await this.ctx.store.upsert([...this.mirrors.values()]);
         await this.ctx.store.upsert([...this.comments.values()]);
+        await this.ctx.store.upsert([...this.follows.values()]);
+        await this.ctx.store.upsert([...this.followProfiles.values()]);
 
         if (flushCache) {
             this.initializeMaps();

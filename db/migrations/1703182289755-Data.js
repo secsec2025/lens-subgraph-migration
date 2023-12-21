@@ -1,5 +1,5 @@
-module.exports = class Data1703142187693 {
-    name = 'Data1703142187693'
+module.exports = class Data1703182289755 {
+    name = 'Data1703182289755'
 
     async up(db) {
         await db.query(`CREATE TABLE "stat" ("id" character varying NOT NULL, "total_profiles" numeric NOT NULL, "total_accounts" numeric NOT NULL, "total_posts" numeric NOT NULL, "total_comments" numeric NOT NULL, "total_mirror" numeric NOT NULL, "total_publications" numeric NOT NULL, "last_comment_created_at" numeric, "last_post_created_at" numeric, "last_mirror_created_at" numeric, "last_profile_created" numeric, CONSTRAINT "PK_132de903d366f4c06cd586c43c0" PRIMARY KEY ("id"))`)
@@ -12,11 +12,11 @@ module.exports = class Data1703142187693 {
         await db.query(`CREATE TABLE "profile_profile_follow" ("id" character varying NOT NULL, "is_deleted" boolean NOT NULL, "profile_id" character varying, "follow_profile_id" character varying, CONSTRAINT "PK_8be28b30d279dd2ca2abe8c732c" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_666dd22e4f9c16b802cdeedcf7" ON "profile_profile_follow" ("profile_id") `)
         await db.query(`CREATE INDEX "IDX_23a6c69e0e21a7e6f91d6f7331" ON "profile_profile_follow" ("follow_profile_id") `)
-        await db.query(`CREATE TABLE "comment" ("id" character varying NOT NULL, "pub_id" numeric NOT NULL, "reference_module" text NOT NULL, "reference_module_return_data" text, "content_uri" text NOT NULL, "profile_id_pointed" numeric NOT NULL, "pub_id_pointed" numeric NOT NULL, "collect_module" text, "collect_module_return_data" text, "timestamp" numeric NOT NULL, "from_profile_id" character varying, CONSTRAINT "PK_0b0e4bbc8415ec426f87f3a88e2" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "comment" ("id" character varying NOT NULL, "from_profile_id" character varying, "pub_id" numeric NOT NULL, "reference_module" text NOT NULL, "reference_module_return_data" text, "content_uri" text NOT NULL, "profile_id_pointed" numeric NOT NULL, "pub_id_pointed" numeric NOT NULL, "collect_module" text, "collect_module_return_data" text, "timestamp" numeric NOT NULL, CONSTRAINT "PK_0b0e4bbc8415ec426f87f3a88e2" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_d6bae872652950628ea4c450ba" ON "comment" ("from_profile_id") `)
-        await db.query(`CREATE TABLE "post" ("id" character varying NOT NULL, "pub_id" numeric NOT NULL, "reference_module" text NOT NULL, "reference_module_return_data" text, "content_uri" text NOT NULL, "collect_module" text NOT NULL, "collect_module_return_data" text, "timestamp" numeric NOT NULL, "from_profile_id" character varying, CONSTRAINT "PK_be5fda3aac270b134ff9c21cdee" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "post" ("id" character varying NOT NULL, "from_profile_id" character varying, "pub_id" numeric NOT NULL, "reference_module" text NOT NULL, "reference_module_return_data" text, "content_uri" text NOT NULL, "collect_module" text NOT NULL, "collect_module_return_data" text, "timestamp" numeric NOT NULL, CONSTRAINT "PK_be5fda3aac270b134ff9c21cdee" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_2b4f0e0e9cd72417af64cec030" ON "post" ("from_profile_id") `)
-        await db.query(`CREATE TABLE "mirror" ("id" character varying NOT NULL, "pub_id" numeric NOT NULL, "reference_module" text NOT NULL, "reference_module_return_data" text, "profile_id_pointed" numeric NOT NULL, "pub_id_pointed" numeric NOT NULL, "timestamp" numeric NOT NULL, "from_profile_id" character varying, CONSTRAINT "PK_1550eca1496157edb9af20a1bdd" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "mirror" ("id" character varying NOT NULL, "from_profile_id" character varying, "pub_id" numeric NOT NULL, "reference_module" text NOT NULL, "reference_module_return_data" text, "profile_id_pointed" numeric NOT NULL, "pub_id_pointed" numeric NOT NULL, "timestamp" numeric NOT NULL, CONSTRAINT "PK_1550eca1496157edb9af20a1bdd" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_6e7074ea6dbaff6ac42348f5d7" ON "mirror" ("from_profile_id") `)
         await db.query(`CREATE TABLE "profile" ("id" character varying NOT NULL, "profile_id" numeric NOT NULL, "creator_id" character varying, "owner_id" character varying, "follow_nft" text, "follow_nfturi" text, "handle" text, "image_uri" text, "created_at" numeric, "follow_module" text, "follow_module_return_data" text, "dispatcher" text, "last_updated" numeric NOT NULL, "total_mirrors" numeric NOT NULL, "total_posts" numeric NOT NULL, "total_comments" numeric NOT NULL, "total_followers" numeric NOT NULL, "total_followings" numeric NOT NULL, CONSTRAINT "PK_3dd8bfc97e4a77c70971591bdcb" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_a2807af7492e37ebdc6f4816e2" ON "profile" ("creator_id") `)
@@ -24,7 +24,7 @@ module.exports = class Data1703142187693 {
         await db.query(`CREATE TABLE "follow_profile" ("id" character varying NOT NULL, "follow_id" character varying, "profile_id" character varying, CONSTRAINT "PK_5a50c62f37a77d378361b612d34" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_c6f3e8af348d525a57248e460e" ON "follow_profile" ("follow_id") `)
         await db.query(`CREATE INDEX "IDX_1fbe3bf51d39328216b2b506a5" ON "follow_profile" ("profile_id") `)
-        await db.query(`CREATE TABLE "follow" ("id" character varying NOT NULL, "from_profile_str" text NOT NULL, "timestamp" numeric NOT NULL, "from_account_id" character varying, CONSTRAINT "PK_fda88bc28a84d2d6d06e19df6e5" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "follow" ("id" character varying NOT NULL, "from_account_id" character varying, "from_profile_str" text NOT NULL, "timestamp" numeric NOT NULL, CONSTRAINT "PK_fda88bc28a84d2d6d06e19df6e5" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_5b8c84d547bea31f4c8e572212" ON "follow" ("from_account_id") `)
         await db.query(`CREATE TABLE "follow_nft_transferred" ("id" character varying NOT NULL, "profile_id" numeric, "follow_nftid" numeric, "from" text, "to" text, "timestamp" numeric, "data" text, CONSTRAINT "PK_76bcc9dd912ab98ec53dd8a75c7" PRIMARY KEY ("id"))`)
         await db.query(`ALTER TABLE "account_profile_follow" ADD CONSTRAINT "FK_cfacbac0a0d36733f35a599ecb6" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)

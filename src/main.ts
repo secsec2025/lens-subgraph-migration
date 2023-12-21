@@ -6,7 +6,7 @@ import {LENS_HUB_ADDRESS} from "./constants";
 import {events as lensHubEvents} from './abi/LensHub';
 import {
     handleCommentCreated,
-    handleDispatcherSet, handleFollowModuleSet,
+    handleDispatcherSet, handleFollowed, handleFollowModuleSet,
     handleFollowNFTURISet, handleMirrorCreated, handlePostCreated,
     handleProfileCreated,
     handleProfileCreatorWhitelisted,
@@ -73,6 +73,12 @@ processor.run(new TypeormDatabase({supportHotBlocks: true}), async (ctx) => {
             else if (e.address.toLowerCase() === LENS_HUB_ADDRESS && e.topics[0] === lensHubEvents.CommentCreated.topic) {
                 const eventData: CommentCreatedEventData = lensHubEvents.CommentCreated.decode(e);
                 await handleCommentCreated(eventData, e, entityCache);
+            }
+
+            // handleFollowed
+            else if (e.address.toLowerCase() === LENS_HUB_ADDRESS && e.topics[0] === lensHubEvents.Followed.topic) {
+                const eventData: FollowedEventData = lensHubEvents.Followed.decode(e);
+                await handleFollowed(eventData, e, entityCache);
             }
 
         }
