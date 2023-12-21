@@ -25,6 +25,9 @@ export class Account {
     @ManyToOne_(() => Profile, {nullable: true})
     defaultProfile!: Profile | undefined | null
 
+    @Column_({nullable: true})
+    defaultProfileId!: string | undefined | null;
+
     /**
      * List of Id profiles(String)
      */

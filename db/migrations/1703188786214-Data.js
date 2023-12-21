@@ -1,5 +1,5 @@
-module.exports = class Data1703186359669 {
-    name = 'Data1703186359669'
+module.exports = class Data1703188786214 {
+    name = 'Data1703188786214'
 
     async up(db) {
         await db.query(`CREATE TABLE "stat" ("id" character varying NOT NULL, "total_profiles" numeric NOT NULL, "total_accounts" numeric NOT NULL, "total_posts" numeric NOT NULL, "total_comments" numeric NOT NULL, "total_mirror" numeric NOT NULL, "total_publications" numeric NOT NULL, "last_comment_created_at" numeric, "last_post_created_at" numeric, "last_mirror_created_at" numeric, "last_profile_created" numeric, CONSTRAINT "PK_132de903d366f4c06cd586c43c0" PRIMARY KEY ("id"))`)
@@ -7,7 +7,7 @@ module.exports = class Data1703186359669 {
         await db.query(`CREATE TABLE "account_profile_follow" ("id" character varying NOT NULL, "account_id" character varying, "profile_id" character varying, "is_deleted" boolean NOT NULL, CONSTRAINT "PK_17fddfd87a686c52ad33014865f" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_cfacbac0a0d36733f35a599ecb" ON "account_profile_follow" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_c2141cf4c98b87562f09202803" ON "account_profile_follow" ("profile_id") `)
-        await db.query(`CREATE TABLE "account" ("id" character varying NOT NULL, "address" text NOT NULL, "profiles_ids" text array NOT NULL, "total_followings" numeric NOT NULL, "default_profile_id" character varying, CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "account" ("id" character varying NOT NULL, "address" text NOT NULL, "default_profile_id" character varying, "profiles_ids" text array NOT NULL, "total_followings" numeric NOT NULL, CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_e8d51e2c2e9c0eef4ed892da2c" ON "account" ("default_profile_id") `)
         await db.query(`CREATE TABLE "profile_profile_follow" ("id" character varying NOT NULL, "profile_id" character varying, "follow_profile_id" character varying, "is_deleted" boolean NOT NULL, CONSTRAINT "PK_8be28b30d279dd2ca2abe8c732c" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_666dd22e4f9c16b802cdeedcf7" ON "profile_profile_follow" ("profile_id") `)

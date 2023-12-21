@@ -21,4 +21,5 @@ type FollowedEventData = {follower: string, profileIds: bigint[], followModuleDa
 
 type FollowNFTTransferredEventData = {profileId: bigint, followNFTId: bigint, from: string, to: string, timestamp: bigint};
 
+type DefaultProfileSetEventData = {wallet: string, profileId: bigint, timestamp: bigint};
 

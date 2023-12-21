@@ -5,7 +5,7 @@ import {LENS_HUB_ADDRESS} from "./constants";
 
 import {events as lensHubEvents} from './abi/LensHub';
 import {
-    handleCommentCreated,
+    handleCommentCreated, handleDefaultProfileSetEvents,
     handleDispatcherSet, handleFollowed, handleFollowModuleSet, handleFollowNFTTransferred,
     handleFollowNFTURISet, handleMirrorCreated, handlePostCreated,
     handleProfileCreated,
@@ -17,6 +17,7 @@ processor.run(new TypeormDatabase({supportHotBlocks: true}), async (ctx) => {
     console.log(`Batch Size - ${ctx.blocks.length} blocks`);
 
     const entityCache: EntityCache = new EntityCache(ctx);
+    const defaultProfileSetEvents: DefaultProfileSetEventData[] = [];
 
     for (let c of ctx.blocks) {
         for (let e of c.logs) {
@@ -87,8 +88,20 @@ processor.run(new TypeormDatabase({supportHotBlocks: true}), async (ctx) => {
                 await handleFollowed(eventData, e, entityCache);
             }
 
+
+            // store DefaultProfileSet Events to handle them separately after the other events (due to circular foreign keys)
+            else if (e.address.toLowerCase() === LENS_HUB_ADDRESS && e.topics[0] === lensHubEvents.DefaultProfileSet.topic) {
+                const eventData: DefaultProfileSetEventData = lensHubEvents.DefaultProfileSet.decode(e);
+                defaultProfileSetEvents.push(eventData);
+            }
+
         }
     }
 
     await entityCache.persistCacheToDatabase(false);
+
+
+    // handle DefaultProfileSet separately after handling all the other events
+    await handleDefaultProfileSetEvents(defaultProfileSetEvents, entityCache);
+
 });

@@ -5,12 +5,12 @@ import {creators} from "../modules/creators";
 import {publications} from "../modules/publications";
 import {stats} from "../modules/lens";
 import {follows} from "../modules/follows";
-import {AccountProfileFollow, FollowProfile} from "../model";
+import {Account, AccountProfileFollow, FollowProfile} from "../model";
 import {ZERO_ADDRESS} from "../constants";
 import assert from "assert";
 import {transfersNFT} from "../modules/transfersNFT";
 
-export const handleProfileCreated =async (eventData: ProfileCreatedEventData, logEvent: any, entityCache: EntityCache) => {
+export const handleProfileCreated = async (eventData: ProfileCreatedEventData, logEvent: any, entityCache: EntityCache) => {
     const eventData_creator = eventData.creator.toLowerCase();
     const eventData_to = eventData.to.toLowerCase();
     const eventData_followModule = eventData.followModule.toLowerCase();
@@ -35,28 +35,28 @@ export const handleProfileCreated =async (eventData: ProfileCreatedEventData, lo
 }
 
 
-export const handleFollowNFTURISet =async (eventData: FollowNFTURISetEventData, logEvent: any, entityCache: EntityCache) => {
+export const handleFollowNFTURISet = async (eventData: FollowNFTURISetEventData, logEvent: any, entityCache: EntityCache) => {
     const profile = await profiles.getOrCreateProfile(eventData.profileId, eventData.timestamp, entityCache);
     profile.followNFTURI = eventData.followNFTURI;
     entityCache.saveProfile(profile);
 }
 
 
-export const handleProfileImageURISet =async (eventData: ProfileImageURISetEventData, logEvent: any, entityCache: EntityCache) => {
+export const handleProfileImageURISet = async (eventData: ProfileImageURISetEventData, logEvent: any, entityCache: EntityCache) => {
     const profile = await profiles.getOrCreateProfile(eventData.profileId, eventData.timestamp, entityCache);
     profile.imageURI = eventData.imageURI;
     entityCache.saveProfile(profile);
 }
 
 
-export const handleDispatcherSet =async (eventData: DispatcherSetEventData, logEvent: any, entityCache: EntityCache) => {
+export const handleDispatcherSet = async (eventData: DispatcherSetEventData, logEvent: any, entityCache: EntityCache) => {
     const profile = await profiles.getOrCreateProfile(eventData.profileId, eventData.timestamp, entityCache);
     profile.dispatcher = eventData.dispatcher.toLowerCase();
     entityCache.saveProfile(profile);
 }
 
 
-export const handleProfileCreatorWhitelisted =async (eventData: ProfileCreatorWhitelistedEventData, logEvent: any, entityCache: EntityCache) => {
+export const handleProfileCreatorWhitelisted = async (eventData: ProfileCreatorWhitelistedEventData, logEvent: any, entityCache: EntityCache) => {
     const creator = await creators.getOrCreateCreator(eventData.profileCreator.toLowerCase(), eventData.timestamp, entityCache);
     creator.isWhitelisted = eventData.whitelisted;
     creator.lastUpdated = eventData.timestamp;
@@ -64,7 +64,7 @@ export const handleProfileCreatorWhitelisted =async (eventData: ProfileCreatorWh
 }
 
 
-export const handleFollowModuleSet =async (eventData: FollowModuleSetEventData, logEvent: any, entityCache: EntityCache) => {
+export const handleFollowModuleSet = async (eventData: FollowModuleSetEventData, logEvent: any, entityCache: EntityCache) => {
     const profile = await profiles.getOrCreateProfile(eventData.profileId, eventData.timestamp, entityCache);
     profile.followModule = eventData.followModule.toLowerCase();
     profile.followModuleReturnData = eventData.followModuleReturnData;
@@ -72,7 +72,7 @@ export const handleFollowModuleSet =async (eventData: FollowModuleSetEventData, 
 }
 
 
-export const handlePostCreated =async (eventData: PostCreatedEventData, logEvent: any, entityCache: EntityCache) => {
+export const handlePostCreated = async (eventData: PostCreatedEventData, logEvent: any, entityCache: EntityCache) => {
     const post = await publications.getOrCreatePost(eventData.profileId, eventData.pubId, entityCache);
 
     post.fromProfileId = eventData.profileId.toString();
@@ -90,7 +90,7 @@ export const handlePostCreated =async (eventData: PostCreatedEventData, logEvent
     entityCache.savePost(post);
 }
 
-export const handleMirrorCreated =async (eventData: MirrorCreatedEventData, logEvent: any, entityCache: EntityCache) => {
+export const handleMirrorCreated = async (eventData: MirrorCreatedEventData, logEvent: any, entityCache: EntityCache) => {
     const mirror = await publications.getOrCreateMirror(eventData.profileId, eventData.pubId, entityCache);
 
     mirror.fromProfileId = eventData.profileId.toString();
@@ -108,7 +108,7 @@ export const handleMirrorCreated =async (eventData: MirrorCreatedEventData, logE
 }
 
 
-export const handleCommentCreated =async (eventData: CommentCreatedEventData, logEvent: any, entityCache: EntityCache) => {
+export const handleCommentCreated = async (eventData: CommentCreatedEventData, logEvent: any, entityCache: EntityCache) => {
     const comment = await publications.getOrCreateComment(eventData.profileId, eventData.pubId, entityCache);
 
     comment.fromProfileId = eventData.profileId.toString();
@@ -129,7 +129,7 @@ export const handleCommentCreated =async (eventData: CommentCreatedEventData, lo
 }
 
 
-export const handleFollowed =async (eventData: FollowedEventData, logEvent: any, entityCache: EntityCache) => {
+export const handleFollowed = async (eventData: FollowedEventData, logEvent: any, entityCache: EntityCache) => {
     const newFollows: string[] = eventData.profileIds.map<string>((profileId: bigint): string => profileId.toString());
     const eventData_follower = eventData.follower.toLowerCase();
 
@@ -151,7 +151,7 @@ export const handleFollowed =async (eventData: FollowedEventData, logEvent: any,
 }
 
 
-export const handleFollowNFTTransferred =async (eventData: FollowNFTTransferredEventData, logEvent: any, entityCache: EntityCache) => {
+export const handleFollowNFTTransferred = async (eventData: FollowNFTTransferredEventData, logEvent: any, entityCache: EntityCache) => {
     const transferId: string = `${eventData.profileId.toString()}-${logEvent.transactionHash}`;
     let from = eventData.from.toLowerCase();
     let to = eventData.to.toLowerCase();
@@ -201,3 +201,16 @@ export const handleFollowNFTTransferred =async (eventData: FollowNFTTransferredE
     entityCache.saveFollowNFTTransfer(nft);
 }
 
+
+export const handleDefaultProfileSetEvents = async (eventsData: DefaultProfileSetEventData[], entityCache: EntityCache) => {
+    const updatedAccountsMap: Map<string,Account> = new Map<string, Account>();
+
+    for (let i = 0; i < eventsData.length; i++) {
+        const eventData = eventsData[i];
+        let account = await accounts.getOrCreateAccount(eventData.wallet.toLowerCase(), entityCache);
+        account.defaultProfileId = eventData.profileId.toString();
+        updatedAccountsMap.set(account.id, account);
+        entityCache.saveAccount(account);
+    }
+    await entityCache.saveDefaultProfileSetAccounts([...updatedAccountsMap.values()]);
+}

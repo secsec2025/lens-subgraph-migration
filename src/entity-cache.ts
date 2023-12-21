@@ -219,6 +219,12 @@ export class EntityCache {
     }
 
 
+    // Explicit save function to save Accounts when their default profile is set
+    saveDefaultProfileSetAccounts = async (accounts: Account[]) => {
+        await this.ctx.store.upsert(accounts);
+    }
+
+
     // Persist Cache to DB
     persistCacheToDatabase = async (flushCache: boolean) => {
         await this.ctx.store.upsert([...this.stats.values()]);
