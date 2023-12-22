@@ -12,6 +12,7 @@ import {
     handleProfileCreatorWhitelisted,
     handleProfileImageURISet
 } from "./mappings";
+import {extractContentURIFromCommentCreatedLog, extractContentURIFromPostCreatedLog} from "./helpers/log-helper";
 
 processor.run(new TypeormDatabase({supportHotBlocks: true}), async (ctx) => {
     console.log(`Batch Size - ${ctx.blocks.length} blocks`);
@@ -61,7 +62,8 @@ processor.run(new TypeormDatabase({supportHotBlocks: true}), async (ctx) => {
             // handlePostCreated
             else if (e.address.toLowerCase() === LENS_HUB_ADDRESS && e.topics[0] === lensHubEvents.PostCreated.topic) {
                 const eventData: PostCreatedEventData = lensHubEvents.PostCreated.decode(e);
-                await handlePostCreated(eventData, e, entityCache);
+                const contentURI = extractContentURIFromPostCreatedLog(e.data, e.topics);
+                await handlePostCreated(eventData, contentURI, e, entityCache);
             }
 
             // handleMirrorCreated
@@ -73,7 +75,8 @@ processor.run(new TypeormDatabase({supportHotBlocks: true}), async (ctx) => {
             // handleCommentCreated
             else if (e.address.toLowerCase() === LENS_HUB_ADDRESS && e.topics[0] === lensHubEvents.CommentCreated.topic) {
                 const eventData: CommentCreatedEventData = lensHubEvents.CommentCreated.decode(e);
-                await handleCommentCreated(eventData, e, entityCache);
+                const contentURI = extractContentURIFromCommentCreatedLog(e.data, e.topics);
+                await handleCommentCreated(eventData, contentURI, e, entityCache);
             }
 
             // handleFollowNFTTransferred

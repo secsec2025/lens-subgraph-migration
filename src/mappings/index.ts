@@ -72,7 +72,7 @@ export const handleFollowModuleSet = async (eventData: FollowModuleSetEventData,
 }
 
 
-export const handlePostCreated = async (eventData: PostCreatedEventData, logEvent: any, entityCache: EntityCache) => {
+export const handlePostCreated = async (eventData: PostCreatedEventData, contentURI: string, logEvent: any, entityCache: EntityCache) => {
     const post = await publications.getOrCreatePost(eventData.profileId, eventData.pubId, entityCache);
 
     post.fromProfileId = eventData.profileId.toString();
@@ -80,7 +80,7 @@ export const handlePostCreated = async (eventData: PostCreatedEventData, logEven
     post.referenceModule = eventData.referenceModule.toLowerCase();
     post.referenceModuleReturnData = eventData.referenceModuleReturnData;
     post.timestamp = eventData.timestamp;
-    post.contentURI = eventData.contentURI;
+    post.contentURI = contentURI;
     post.collectModule = eventData.collectModule.toLowerCase();
     post.collectModuleReturnData = eventData.collectModuleReturnData;
 
@@ -108,7 +108,7 @@ export const handleMirrorCreated = async (eventData: MirrorCreatedEventData, log
 }
 
 
-export const handleCommentCreated = async (eventData: CommentCreatedEventData, logEvent: any, entityCache: EntityCache) => {
+export const handleCommentCreated = async (eventData: CommentCreatedEventData, contentURI: string, logEvent: any, entityCache: EntityCache) => {
     const comment = await publications.getOrCreateComment(eventData.profileId, eventData.pubId, entityCache);
 
     comment.fromProfileId = eventData.profileId.toString();
@@ -116,7 +116,7 @@ export const handleCommentCreated = async (eventData: CommentCreatedEventData, l
     comment.referenceModule = eventData.referenceModule.toLowerCase();
     comment.referenceModuleReturnData = eventData.referenceModuleReturnData;
     comment.timestamp = eventData.timestamp;
-    comment.contentURI = eventData.contentURI;
+    comment.contentURI = contentURI;
     comment.profileIdPointed = eventData.profileIdPointed;
     comment.pubIdPointed = eventData.pubIdPointed;
     comment.collectModule = eventData.collectModule.toLowerCase();
