@@ -178,13 +178,15 @@ export const handleFollowNFTTransferred = async (eventData: FollowNFTTransferred
         // BURN FOLLOW NFT
         let fromAccount = await accounts.getOrCreateAccount(from, entityCache);
         profile.totalFollowers = profile.totalFollowers - 1n;
+        fromAccount.totalFollowings = fromAccount.totalFollowings - 1n;
 
         //minus and count the follower to the profile and the fromAccount
         const accountProfileFollowRecord = await entityCache.getAccountProfileFollow(`${fromAccount.id}-${profile.id}`);
-        assert(accountProfileFollowRecord, `accountProfileFollowRecord for ${fromAccount.id} with profile ${profile.id} should exist at this point.`);
-        accountProfileFollowRecord.isDeleted = true;
-        entityCache.saveAccountProfileFollow(accountProfileFollowRecord);
-        fromAccount.totalFollowings = fromAccount.totalFollowings - 1n;
+        //assert(accountProfileFollowRecord, `accountProfileFollowRecord for ${fromAccount.id} with profile ${profile.id} should exist at this point.`);
+        if (accountProfileFollowRecord) {
+            accountProfileFollowRecord.isDeleted = true;
+            entityCache.saveAccountProfileFollow(accountProfileFollowRecord);
+        }
 
         await profiles.updateProfilesFollowings(fromAccount.profilesIds, profile.id, fromAccount.totalFollowings, true, entityCache);
         entityCache.saveAccount(fromAccount);
